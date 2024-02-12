@@ -20,32 +20,19 @@ std::string cellChar(Cell cell) {
     return "[ ]";
 }
 
-Minesweeper::Minesweeper(unsigned dim, unsigned n_mines) {
-    {
-        const Row default_row(dim);
-        for (int i = 0; i < dim; ++i) {
-            grid_.push_back(default_row);
-        }
-    }
-    {
-        auto mines_loc = Random().draw_without_replacement(dim * dim, n_mines);
-        for (unsigned loc : mines_loc)
-            grid_[loc / dim][loc % dim].setMine();
-    }
+Minesweeper::Minesweeper(unsigned dim, unsigned n_mines) : grid_(dim) {
+    const auto mines_loc = Random().draw_without_replacement(dim * dim, n_mines);
+    for (const unsigned loc : mines_loc)
+        grid_.get(loc / dim, loc % dim).setMine();
 }
 
 void Minesweeper::click(unsigned x, unsigned y) {
-    if (x >= grid_.size() || y >= grid_.size())
-        throw std::runtime_error("x or y out of bounds");
-
-    grid_[x][y].click();
+    grid_.get(x, y).click();
 }
 
 void Minesweeper::print(std::ostream& os) const {
-    for (const auto& row : grid_) {
-        for (const auto& cell : row) {
-            os << cellChar(cell) << ' ';
-        }
-        os << std::endl;
-    }
+    grid_.iterate(
+        [&os](const Cell& cell) { os << cellChar(cell); },
+        [&os]() { os << std::endl; }
+    );
 }

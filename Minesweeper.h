@@ -6,6 +6,8 @@
 #define MINESWEEPER_H
 #include <vector>
 
+#include "Grid.h"
+
 
 struct Cell {
     bool mine_{false};
@@ -18,8 +20,7 @@ struct Cell {
 };
 
 class Minesweeper {
-    using Row = std::vector<Cell>;
-    std::vector<Row> grid_;
+    Grid<Cell> grid_;
 
 public:
     explicit Minesweeper(unsigned dim, unsigned n_mines);
