@@ -6,4 +6,5 @@ set(CMAKE_CXX_STANDARD 17)
 add_executable(Minesweeper main.cpp
         Minesweeper.cpp
         Minesweeper.h
-        Random.h)
+        Random.h
+        Grid.h)
