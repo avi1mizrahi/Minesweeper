@@ -4,33 +4,55 @@
 
 #ifndef MINESWEEPER_H
 #define MINESWEEPER_H
-#include <vector>
 
 #include "Grid.h"
 
 
 struct Cell {
-    bool mine_{false};
-    bool digged_{false};
-    bool flagged_{false};
+    int mines_around{0};
+    bool mine{false};
+    bool digged{false};
+    bool flagged{false};
 
-    void setMine() { mine_ = true; }
-    void flag() { flagged_ = true; }
-    void click() { digged_ = true; }
+    void setMine() { mine = true; }
+    void flag() { flagged = true; }
+    void dig() { digged = true; }
 };
 
 class Minesweeper {
+public:
+    enum class GameState {
+        ONGOING,
+        WIN,
+        LOST
+    };
+
+private:
     Grid<Cell> grid_;
+    unsigned n_unknown;
+    GameState state_{GameState::ONGOING};
+
+    void propagateClick(Grid<Cell>::CellRef ref);
+
+    void print(std::ostream& os, bool reveal);
 
 public:
     explicit Minesweeper(unsigned dim, unsigned n_mines);
 
     void click(unsigned x, unsigned y);
+    void flag(unsigned x, unsigned y);
 
-    void print(std::ostream& os) const;
+    static class Reveal {} reveal;
+
+    void print(std::ostream& os) { print(os, false); }
+
+    void print(std::ostream& os, Reveal) { print(os, true); }
+
+    [[nodiscard]]
+    GameState state() const { return state_; }
 };
 
-inline std::ostream& operator<<(std::ostream& os, const Minesweeper& ms) {
+inline std::ostream& operator<<(std::ostream& os, Minesweeper& ms) {
     ms.print(os);
     return os;
 }

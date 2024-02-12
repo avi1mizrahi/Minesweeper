@@ -3,14 +3,28 @@
 #include "Minesweeper.h"
 
 int main() {
-    Minesweeper minesweeper(7, 10);
-    std::cout << minesweeper << std::endl;
+    unsigned size, n_mines;
+    std::cout << "WELCOME TO  - M I N E S W E E P E R -" << std::endl;
+    std::cout << "Enter the grid width: ";
+    std::cin >> size;
+    std::cout << std::endl << "Enter the number of mines: ";
+    std::cin >> n_mines;
+    std::cout << std::endl;
 
-    minesweeper.click(1,3);
-    std::cout << minesweeper << std::endl;
+    Minesweeper minesweeper(size, n_mines);
+    minesweeper.print(std::cout, Minesweeper::reveal);
 
-    minesweeper.click(4,4);
-    std::cout << minesweeper << std::endl;
+    std::cout << "Now, give x,y sequentially" << std::endl;
+
+    while (minesweeper.state() == Minesweeper::GameState::ONGOING) {
+        std::cout << minesweeper << std::endl;
+        unsigned x, y;
+        std::cin >> x >> y;
+        minesweeper.click(x, y);
+    }
+
+    minesweeper.print(std::cout, Minesweeper::reveal);
+    std::cout << (minesweeper.state() == Minesweeper::GameState::WIN ? "WIN!!!" : "LOST :(") << std::endl;
 
     return 0;
 }

@@ -12,11 +12,33 @@ class Grid {
     using Row = std::vector<T>;
     std::vector<Row> grid_;
 
-    [[nodiscard]] bool inBounds(int x, int y) const {
+    [[nodiscard]]
+    bool inBounds(int x, int y) const {
+        return x >= 0 && y >= 0 && x < grid_.size() && y < grid_.size();
+    }
+
+    [[nodiscard]]
+    bool inBounds(unsigned x, unsigned y) const {
         return x < grid_.size() && y < grid_.size();
     }
 
 public:
+    class CellRef {
+        const unsigned x;
+        const unsigned y;
+
+        friend Grid;
+
+    public:
+        T& cell;
+
+        CellRef(unsigned x, unsigned y, T& cell): x(x), y(y), cell(cell) {}
+
+        void print(std::ostream& o) const {
+            o << "Ref[" << x << "," << y << "]";
+        }
+    };
+
     explicit Grid(unsigned dim) {
         const Row default_row(dim);
         for (int i = 0; i < dim; ++i) {
@@ -24,33 +46,44 @@ public:
         }
     }
 
-    T& get(unsigned x, unsigned y) {
+    CellRef get(unsigned x, unsigned y) {
         if (!inBounds(x, y)) throw std::out_of_range("out of grid bounds");
-        return grid_[x][y];
+        return createRef(x, y);
     }
 
-    void neigboors(unsigned x, unsigned y, std::function<void(T&)> visit) {
-        for (int dx = -1; dx <= 1; ++dx) {
-            const int vx = x + dx;
-            for (int dy = -1; dy <= 1; ++dy) {
-                const int vy = y + dy;
-                if (vx == x && vy == y) continue;
-                if (inBounds(vx, vy)) {
-                    visit(grid_[vx][vy]);
+    void neigboors(CellRef ref, std::function<void(CellRef)> visit) {
+        const int refx = static_cast<int>(ref.x);
+        const int refy = static_cast<int>(ref.y);
+
+        for (int x = refx - 1; x <= refx + 1; ++x) {
+            for (int y = refy - 1; y <= refy + 1; ++y) {
+                if (x == refx && y == refy) continue;
+                if (inBounds(x, y)) {
+                    visit(createRef(x, y));
                 }
             }
         }
     }
 
-    void iterate(std::function<void(const T&)> visit, std::function<void()> row_end) const {
-        for (const auto& row : grid_) {
-            for (const auto& cell : row) {
-                visit(cell);
+    void iterate(
+        std::function<void(CellRef)> visit,
+        const std::function<void()>& row_start,
+        const std::function<void()>& row_end
+    ) {
+        for (int x = 0; x < grid_.size(); ++x) {
+            row_start();
+            for (int y = 0; y < grid_.size(); ++y) {
+                visit(createRef(x, y));
             }
             row_end();
         }
     }
-};
 
+    [[nodiscard]]
+    unsigned dim() const { return grid_.size(); }
+
+private:
+    CellRef createRef(unsigned x, unsigned y) { return CellRef(x, y, grid_[x][y]); }
+};
 
 #endif //GRID_H
