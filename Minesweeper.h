@@ -7,19 +7,20 @@
 #include <vector>
 
 
-enum class Cell {
-    EMPTY = 0,
-    MINE = 1,
-    FLAG = 2,
-    CLEARED = 3,
-    EXPLODED = 4,
+struct Cell {
+    bool mine_{false};
+    bool digged_{false};
+    bool flagged_{false};
+
+    void setMine() { mine_ = true; }
+    void flag() { flagged_ = true; }
+    void click() { digged_ = true; }
 };
 
-std::string cellChar(Cell cell);
-
-
 class Minesweeper {
-    std::vector<std::vector<Cell>> matrix_;
+    using Row = std::vector<Cell>;
+    std::vector<Row> grid_;
+
 public:
     explicit Minesweeper(unsigned dim, unsigned n_mines);
 
