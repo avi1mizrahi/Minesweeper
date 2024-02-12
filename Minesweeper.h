@@ -12,10 +12,8 @@ struct Cell {
     int mines_around{0};
     bool mine{false};
     bool digged{false};
-    bool flagged{false};
 
     void setMine() { mine = true; }
-    void flag() { flagged = true; }
     void dig() { digged = true; }
 };
 
@@ -40,7 +38,6 @@ public:
     explicit Minesweeper(unsigned dim, unsigned n_mines);
 
     void click(unsigned x, unsigned y);
-    void flag(unsigned x, unsigned y);
 
     static class Reveal {} reveal;
 

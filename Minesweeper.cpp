@@ -25,9 +25,6 @@ std::string cellChar(const Cell cell, bool reveal=false) {
         }
         return "[ ]";
     }
-    if (cell.flagged) {
-        return "[P]";
-    }
     return "[.]";
 }
 
@@ -78,10 +75,6 @@ void Minesweeper::click(unsigned x, unsigned y) {
     }
 
     propagateClick(cellref);
-}
-
-void Minesweeper::flag(unsigned x, unsigned y) {
-    grid_.get(x, y).cell.flag();
 }
 
 void Minesweeper::print(std::ostream& os, bool reveal) {
