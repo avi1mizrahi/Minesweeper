@@ -9,11 +9,6 @@
 
 #include "Random.h"
 
-std::ostream& operator<<(std::ostream& o, const Grid<Cell>::CellRef& ref) {
-    ref.print(o);
-    return o;
-}
-
 bool Cell::dig() {
     auto was = digged;
     digged = true;

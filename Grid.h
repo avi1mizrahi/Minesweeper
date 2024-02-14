@@ -33,10 +33,6 @@ public:
         T& cell;
 
         CellRef(unsigned x, unsigned y, T& cell): x(x), y(y), cell(cell) {}
-
-        void print(std::ostream& o) const {
-            o << "Ref[" << x << "," << y << "]";
-        }
     };
 
     explicit Grid(unsigned dim) {
