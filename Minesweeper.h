@@ -8,13 +8,19 @@
 #include "Grid.h"
 
 
-struct Cell {
+class Cell {
     int mines_around{0};
     bool mine{false};
     bool digged{false};
 
+public:
     void setMine() { mine = true; }
-    void dig() { digged = true; }
+    bool dig();
+    bool hasMine() const { return mine; }
+    bool hasMinesAround() const { return mines_around != 0; }
+    void informMineAround() { ++mines_around; }
+
+    std::string toString(bool reveal = false) const;
 };
 
 class Minesweeper {

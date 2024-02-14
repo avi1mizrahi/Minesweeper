@@ -5,7 +5,6 @@
 
 #include "Minesweeper.h"
 
-#include <cassert>
 #include <iomanip>
 
 #include "Random.h"
@@ -15,17 +14,21 @@ std::ostream& operator<<(std::ostream& o, const Grid<Cell>::CellRef& ref) {
     return o;
 }
 
-std::string cellChar(const Cell cell, bool reveal=false) {
-    if (cell.digged || reveal) {
-        if (cell.mine) {
-            return "[@]";
-        }
-        if (cell.mines_around) {
-            return "[" + std::to_string(cell.mines_around) + "]";
-        }
-        return "[ ]";
+bool Cell::dig() {
+    auto was = digged;
+    digged = true;
+    return was;
+}
+
+std::string Cell::toString(bool reveal) const {
+    if (!digged && !reveal) return "[ ]";
+    if (mine) {
+        return "[@]";
     }
-    return "[.]";
+    if (mines_around) {
+        return "[" + std::to_string(mines_around) + "]";
+    }
+    return "   ";
 }
 
 Minesweeper::Minesweeper(unsigned dim, unsigned n_mines) : grid_(dim), n_unknown(dim*dim - n_mines) {
@@ -36,8 +39,8 @@ Minesweeper::Minesweeper(unsigned dim, unsigned n_mines) : grid_(dim), n_unknown
     grid_.iterate(
         [this](auto cellref) {
             grid_.neigboors(cellref, [&cellref](auto neighboor) {
-                if (neighboor.cell.mine)
-                    ++cellref.cell.mines_around;
+                if (neighboor.cell.hasMine())
+                    cellref.cell.informMineAround();
             });
         },
         [] {},
@@ -48,21 +51,20 @@ Minesweeper::Minesweeper(unsigned dim, unsigned n_mines) : grid_(dim), n_unknown
 void Minesweeper::propagateClick(const Grid<Cell>::CellRef ref) {
     auto& cell = ref.cell;
 
-    if (cell.digged) {
+    if (cell.dig()) {
         return;
     }
 
-    cell.dig();
     --n_unknown;
 
-    if (cell.mine) {
+    if (cell.hasMine()) {
         state_ = GameState::LOST;
         return;
     }
     if (!n_unknown) {
         state_ = GameState::WIN;
     }
-    if (cell.mines_around) {
+    if (cell.hasMinesAround()) {
         return;
     }
 
@@ -85,7 +87,7 @@ void Minesweeper::print(std::ostream& os, bool reveal) {
     unsigned i_row = 0;
     grid_.iterate(
         [&os, this, reveal](auto cellref) {
-            os << cellChar(cellref.cell, reveal);
+            os << cellref.cell.toString(reveal);
         },
         [&os, &i_row] { os << std::setw(first_col_width-1) << " " << i_row++ ; },
         [&os] { os << std::endl; }
