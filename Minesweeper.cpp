@@ -47,19 +47,24 @@ Minesweeper::Minesweeper(unsigned dim, unsigned n_mines) : grid_(dim), n_unknown
 
 void Minesweeper::propagateClick(const Grid<Cell>::CellRef ref) {
     auto& cell = ref.cell;
-    const bool propagate = cell.mines_around == 0 && !cell.digged;
 
-    if (!cell.digged) {
-        cell.dig();
-        --n_unknown;
+    if (cell.digged) {
+        return;
+    }
+
+    cell.dig();
+    --n_unknown;
+
+    if (cell.mine) {
+        state_ = GameState::LOST;
+        return;
     }
     if (!n_unknown) {
         state_ = GameState::WIN;
     }
-
-    assert(!cell.mine);
-
-    if (!propagate) return;
+    if (cell.mines_around) {
+        return;
+    }
 
     grid_.neigboors(ref, [this](auto neighboor) {
         propagateClick(neighboor);
@@ -67,14 +72,7 @@ void Minesweeper::propagateClick(const Grid<Cell>::CellRef ref) {
 }
 
 void Minesweeper::click(unsigned x, unsigned y) {
-    const auto cellref = grid_.get(x, y);
-
-    if (cellref.cell.mine) {
-        state_ = GameState::LOST;
-        return;
-    }
-
-    propagateClick(cellref);
+    propagateClick(grid_.get(x, y));
 }
 
 void Minesweeper::print(std::ostream& os, bool reveal) {
